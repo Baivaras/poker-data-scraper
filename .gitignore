@@ -1,0 +1,29 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# PyCharm / IDEs
+.idea/
+.vscode/
+*.iml
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Logs (generated at runtime — not images)
+logs/
+
+# Snapshots / temp outputs
+snapshot.json
+*.tmp
+
+# Test output
+hands.json

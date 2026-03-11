@@ -1,0 +1,48 @@
+Q2 — Hero seat identification
+
+  How should we know which seat is "us"? Options:
+
+  - A) Fixed region — hero_name is already in regions.json. OCR it once to get hero's username, then scan all seat name
+  regions for that same string.
+  - B) Cards-present heuristic — only hero's seat has face-up cards in the hero region (already done in Phase 1). The seat
+  index whose cards region overlaps with the hero card region.
+  - C) Manual config — user declares hero_seat: 4 in regions.json once at setup. Simplest, never wrong.
+
+  What's your preference? C is the most reliable for a fixed table layout.
+
+  ---
+  Q3 — OCR tool for names/stacks
+
+  The old project uses Tesseract. Options:
+
+  - Tesseract — already installed in the old project, free, good for numbers/stacks
+  - EasyOCR — more accurate on short text/names, bigger dependency (~300MB model)
+  - PokerStars window title — BB size is already in the title ("NL Hold'em 100/200"). Use that for blinds, Tesseract only for
+  stacks/names.
+
+  Are you OK with adding Tesseract as a dependency? Or do you want to keep it pure NN-based?
+
+  ---
+  Q4 — Sitting Out detection
+
+  Is there a visible "Sitting Out" text label next to that player in your screenshots, or is it purely a visual indicator
+  (dimmed avatar, greyed-out name)? This determines if we OCR or do pixel analysis.
+
+  ---
+  Q5 — Phase 2 scope: snapshot or continuous?
+
+  - Snapshot — scan once when HAND_START fires (right after hero cards detected), produce a TableState object, done.
+  - Continuous — re-scan stacks/statuses every frame to catch mid-hand changes (someone busts, sits out).
+
+  For Phase 2 only, snapshot is much simpler and unblocks Phase 3. Continuous can come later. Does that work?
+
+  ---
+  Q6 — Labels for testing
+
+  labels.json has seat usernames and bet amounts but no stack amounts, dealer seat, or sitting-out status. Do you want to:
+  - A) Manually label 20–30 images with stack/status/dealer info now for proper Phase 2 tests
+  - B) Write tests that do sanity checks (format, non-null values, plausibility) without ground-truth comparison — then label
+  later
+  - C) Add a labeling script as part of Phase 2
+
+  What do you want?

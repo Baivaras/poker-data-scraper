@@ -1,0 +1,199 @@
+# Development Log
+
+Running record of decisions, discoveries, and changes made phase by phase.
+
+---
+
+## Phase 1 — Hero Card OCR Pipeline
+
+### Goal
+Detect when new hole cards are dealt and immediately read + emit them as structured data in <100ms.
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `models.py` | `Card`, `HeroCardsResult` dataclasses |
+| `config.py` | `TrackerConfig`, `RegionConfig`, `load_config()`, `crop_region()` |
+| `capture.py` | macOS Quartz screenshot — pure functions |
+| `card_detector.py` | Variance gate → NN split-crop → confidence → `HeroCardsResult` |
+| `hero_watcher.py` | Polling loop, debounce (2 frames), dedup, `replay_dir()` |
+| `test_hero_cards.py` | Accuracy test vs `label_hands.txt` ground truth |
+| `NN/` | Copied `nn_card_reader.py` + `.pth` weights from old project |
+| `regions.json` | Calibrated fractional region coordinates |
+
+### Key Discovery: Two Hero Regions
+`regions.json` hero region `[0.425, 0.6285, 0.5719, 0.6993]` is calibrated for the
+**variance gate only**. The NN was trained on `[0.38, 0.55, 0.58, 0.75]` (larger area).
+Using the calibrated region for the NN produced very low confidence (0.2–0.6).
+**Fix**: Added `hero_nn` key to `regions.json` with the training fractions. Config uses
+`hero` for the fast gate, `hero_nn` for the NN classifier.
+
+### Key Discovery: Inset Cropping
+The original `vision_tracker.py` doesn't split the hero region at midpoint — it uses
+inset fractions: left card = `(cw//8, 5, cw//2-5, ch-5)`, right = `(cw//2+5, 5, 7*cw//8, ch-5)`.
+Using exact midpoint split reduced confidence. Matched the original approach.
+
+### Confidence Metric
+`confidence = min(softmax_rank.max() * softmax_suit.max())` per card, then `min(card1, card2)`.
+Default threshold: `0.30` (product of two softmax peaks — appears low but works well in practice).
+
+### Results
+- **602 / 618** images detected (97.4%)
+- **157 / 157** labeled images correct (100%)
+- **37ms/frame** average in replay mode
+
+---
+
+## Phase 2 — Table State Detection
+
+### Planning Decisions
+
+| Question | Options considered | Decision | Reason |
+|---|---|---|---|
+| Dealer button detection | Template match / color / OCR | 6 labeled seat regions + template match | Most accurate; region-based is faster than full-image sliding window |
+| Hero seat identification | Iterate seats / manual config / fixed region | OCR `hero_name` region | Hero always at same position; one read, no matching needed |
+| OCR tool | Tesseract / EasyOCR / hybrid | Tesseract | Already installed in old project; good for numbers/short names |
+| Seat status detection | Template + OCR / OCR only | OCR only | "Empty Seat" and "Sitting Out" are text — room-agnostic approach |
+| Scope | Snapshot vs continuous | Snapshot at HAND_START | Simpler; continuous tracking deferred to Phase 4 |
+| Test strategy | Ground-truth labels / sanity / code-first | Code first → verify → label | See real output before committing to labeling |
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `table_state.py` | `PlayerState`, `TableState` dataclasses + `assign_positions()` + `clockwise_seat_order()` |
+| `ocr.py` | `read_text()`, `read_number()`, `preprocess()` — Tesseract wrappers |
+| `dealer_detector.py` | `DealerDetector` — NCC template match across all dealer regions |
+| `table_scanner.py` | `TableScanner.scan()` — orchestrates all detections → `TableState` |
+| `test_table_state.py` | Print / label / test modes |
+| `mark_dealer_regions.py` | GUI to label dealer button regions per seat + hero |
+| `README.md` | Setup, calibration, running tests |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `config.py` | Added `hero_name`, `hero_stack`, `hero_dealer`, `hero_bet`, `hero_seat` to `RegionConfig`; added `dealer_match_threshold`, `dealer_scales` to `TrackerConfig` |
+| `regions.json` | Added `dealer` sub-region to each seat (via GUI tool); added top-level `hero_dealer`, `hero_bet` |
+| `requirements.txt` | Added `pytesseract` |
+
+### Key Design: Clockwise Seat Order
+Position assignment (BTN/SB/BB/UTG/MP/CO) requires knowing the clockwise order of seats.
+Rather than hardcoding, `clockwise_seat_order()` auto-computes from seat name region centers:
+1. Find centroid of all seat positions (including hero)
+2. For each seat: `angle = atan2(dx, -dy)` in screen coords (y-down, clockwise from top)
+3. Sort by angle
+
+Computed order for this table: `[4, 5, 0(hero), 1, 2, 3]` — verified correct.
+
+### Position Assignment Formula
+For N active players, chart = `_POSITION_CHARTS[N]` (e.g. `["UTG","MP","CO","BTN","SB","BB"]`).
+BTN index in chart = `max(0, N-3)`. Assignment:
+```
+for chart_offset, pos in enumerate(chart):
+    seat = active[(dealer_idx + chart_offset - btn_in_chart) % N]
+    positions[seat] = pos
+```
+Verified correct for N = 2, 3, 4, 5, 6.
+
+### Seat Status Rules
+```
+username ≈ "empty" AND stack ≈ "seat"  → EMPTY
+stack contains "sitting" / "sit out"   → SITTING_OUT
+username is blank                       → EMPTY
+otherwise                               → ACTIVE
+```
+All OCR-based — no templates needed — works across different room skins.
+
+### Known OCR Noise (to tune/fix in later phases)
+- Action labels ("Fold", "Call", "Post SB") bleed into name region when a player acts
+- Pipe characters (`|`) appear from UI border artifacts → strip in post-processing
+- Some stacks show `?` (None) when stack region is partially obscured by chips
+- Usernames with slashes: "Brownson76" → "Brownson/6" (tesseract confuses 7 and /)
+
+### Results (Phase 2 — Print Mode)
+- Dealer seat detected correctly on all 5 inspected images
+- Position assignment correct (BB, UTG, MP, CO, BTN, SB all right)
+- SITTING_OUT correctly detected from "Sitting Out" stack text
+- Speed: ~800ms/frame (Tesseract dominates — acceptable for snapshot mode)
+
+### Deferred to Phase 4
+- `TableState.big_blind` and `small_blind` are `None` — will be detected from blind posts
+- Continuous re-scan of stacks (see README Future Improvements)
+
+---
+
+---
+
+## Phase 3 — Player Action Tracking
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `core/hand_state.py` | `HandState`, `PlayerAction`, `ActionRound`, `Street` dataclasses |
+| `detection/action_detector.py` | Stack delta → `PlayerAction`, fold via cards variance, 2-frame debounce |
+| `detection/street_detector.py` | Board slot variance → `Street` (PREFLOP/FLOP/TURN/RIVER), debounced |
+| `tracking/game_tracker.py` | Unified poller: IDLE → HAND_STARTING → HAND_ACTIVE → HAND_COMPLETE |
+| `test_game_tracker.py` | Full pipeline replay test with event log + summary table |
+
+### Architecture Decisions
+- **Stack delta as primary signal**: Name OCR dropped — saves 280ms/31% per frame; stacks + bets only = ~620ms/frame
+- **Hero fold does not end hand**: `hero_folded=True` flag; tracking continues until board clears (valuable for opponent profiling)
+- **YOUR_TURN via saturation gate**: RGB saturation spike in action button region (~1ms) — Fold/Call/Raise buttons have high colour saturation
+- **Unified poller (not separate threads)**: Single `process_frame()` call handles all detection per tick; simpler to reason about, no race conditions
+- **Tracking continues after fold**: All opponent actions post-fold captured in `all_actions`
+
+### State Machine
+```
+IDLE → (hero cards debounced) → HAND_STARTING → (Phase 2 snapshot) → HAND_ACTIVE
+HAND_ACTIVE → (board clears + hero absent ≥3 frames) → HAND_COMPLETE → IDLE
+```
+
+---
+
+## Phase 4 — BB Detection & amount_bb
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `detection/bb_detector.py` | `parse_bb_from_title()` + `detect_bb_from_pot()` + `detect_bb()` |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `core/hand_state.py` | Added `bb_amount: Optional[float]` field |
+| `tracking/game_tracker.py` | Detects BB at hand start, fills `amount_bb` on every `PlayerAction` |
+
+### Detection Strategy
+1. **Window title** (primary): Parse "SB/BB" pattern from PS window title — `kCGWindowName` already captured in `get_pokerstars_window()`. Supports `$0.50/$1.00`, `50/100`, `€1/€2` formats.
+2. **Pot OCR fallback**: After blinds post, pot = SB + BB = 1.5 × BB, so `BB ≈ pot / 1.5`. Room-agnostic.
+
+`amount_bb = action.amount / bb_amount` filled inline via `_fill_bb()` in `GameTracker`.
+
+---
+
+## Phase 5 — Community Card OCR
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `detection/board_detector.py` | `detect_board_cards(img, cfg)` — NN classify each board slot |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `tracking/game_tracker.py` | Calls `detect_board_cards()` on street change, fills `hand_state.community_cards` |
+| `test_game_tracker.py` | Shows board cards + BB in HAND_COMPLETE line and summary table |
+
+### Approach
+- Same MobileNetV2 NN as hero cards — board cards are face-up playing cards with identical design
+- Variance gate per slot → NN classify → confidence threshold 0.20 (lower than hero due to cleaner crops)
+- Called on `on_street_change` so community_cards always reflects the current board state
+- `board_cards_to_str()` utility for display
+
+---
+
+## Pending / Next Phases
+
+| Phase | Goal |
+|-------|------|
+| 6 | Data aggregation & output (hand history JSON, WebSocket/live feed, GTO integration) |
+| Validation | Collect Phase 3–5 test images from live session → run `test_game_tracker.py` |

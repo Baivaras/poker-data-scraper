@@ -1,0 +1,634 @@
+# Label your hands - one per line
+# Format: filename  card1 card2
+# Example: 1.png Th 7s
+
+1.png Js 7c
+2.png Js 4h
+3.png Qh Qd
+4.png 4c 2c
+5.png 6c 6d
+6.png 3h 2s
+7.png 9c 6c
+8.png 9d 7h
+9.png Ah 7s
+10.png Jh Ts
+11.png Ah 7h
+12.png Ac 5s
+13.png Ts 4h
+14.png Ac 2s
+15.png 2s 2d
+16.png Kd 3d
+17.png 5c 3c
+18.png Qd Jh
+19.png Kd Jd
+20.png Jc 7c
+21.png 8h 4c
+22.png 7d 6c
+23.png 6c 4d
+24.png Ts 9h
+25.png Ac 4h
+26.png As Kd
+27.png 9d 3c
+28.png Jh 9h
+29.png Qs 8s
+30.png 9d 4h
+31.png 8h 8d
+32.png 7s 5c
+33.png 8h 7c
+34.png 4c 2c
+35.png Kc 8c
+36.png 8c 8d
+37.png 6d 4d
+38.png As 3c
+39.png Td 8c
+40.png 8h 4h
+41.png Ks 7c
+42.png Ks Qd
+43.png 7h 4h 
+44.png Qd 4d
+45.png 5s 4c
+46.png 4h 2h
+47.png As 7d
+48.png 7h 5s
+49.png Ad 2c
+50.png 9c 5s
+51.png Ks 9c
+52.png Ts 4d
+53.png 6h 2c
+54.png 7h 3s
+55.png 8s 3h
+59.png 4h 3h
+60.png 9h 5c
+61.png Kh 8d
+62.png Kc 3h
+63.png Kc Js
+64.png Tc 6d
+65.png 6s 2c
+66.png Qs 9s
+67.png 9s 8h
+68.png Ad 3s
+69.png Tc 8c
+70.png Ad 8c
+71.png Qs Th
+72.png As 3s
+73.png Ks 6h
+74.png 6d 3c
+75.png 6d 4h
+76.png 9s 6c
+77.png 7s 4s
+78.png Ks 5s
+79.png 6h 6c
+80.png 8c 4h
+81.png Td 4c
+82.png Qh Tc
+83.png Jh 5h
+84.png Ks 9d
+85.png Ad Tc
+86.png 4h 4d
+87.png Ac Kd
+88.png Kh 4c
+89.png 6h 3c
+90.png 7d 6d
+91.png Qc Jc
+92.png 4c 2s
+93.png Kc 6d
+94.png As Th
+95.png 9h 4c
+96.png 6h 5d
+97.png 8d 7h
+98.png 9h 8c
+99.png 7d 3d
+100.png 3s 3h
+101.png 7c 3s
+102.png 5s 2c
+103.png Qd 5h
+104.png Ad Ks
+105.png 8c 3c
+106.png Ts 5c
+107.png Ks 4d
+108.png Ah Kc
+109.png 9d 4s
+110.png Td 7s
+111.png 5s 2h
+112.png As 6c
+113.png Ah 7h
+114.png 6c 5s
+115.png 6d 4c
+116.png Qh 7d
+117.png 6h 4h
+119.png Kc Jc
+120.png Ac 7d
+121.png As 5h
+122.png Ts 2d
+123.png Ad 3d
+124.png Jc 8h
+125.png Ad 4d
+126.png Qs Jd
+127.png Ac 2d
+128.png Ad 2c
+129.png Qc 7d
+130.png Kh 4c
+131.png Kh 3s
+132.png Qc 8d
+133.png Kc 8d
+135.png Qs 9d
+# 136.png Ts 8h  
+# 137.png Ks Qh  
+# 138.png Qc 9d  
+# 139.png Qs 6h  
+# 140.png Ts 6h  
+# 141.png 9d 8c  
+# 142.png Ks 8s  
+# 143.png 9s 9h  
+# 144.png Kd 5d  
+# 145.png Ts 6c  
+# 146.png Jd 4h  
+# 147.png 6h 5d  
+# 148.png Qd 4c  
+# 149.png Ts 6s  
+# 150.png As Td  
+# 151.png 9c 9c  
+# 152.png Qc Th  
+# 153.png Kh 6d  
+# 154.png 7c 4s  
+# 155.png 8d 6h  
+# 156.png Ad 8d  
+# 157.png Tc 8c  
+# 158.png 9c 6h  
+# 159.png 7s 6h  
+# 160.png 6c 5c  
+# 161.png Td 9h  
+# 162.png 6c 4d  
+# 163.png Td 7h  
+# 164.png Tc 2d  
+# 165.png 6d 2c  
+# 166.png Qc 3d  
+# 167.png Qc 7h  
+# 168.png 9d 5s  
+# 169.png 8d 2h  
+# 170.png Kd 8s  
+# 171.png 9d 2d  
+# 172.png 9s 2h  
+# 173.png Td 5s  
+# 174.png Qd 4d  
+# 175.png Td 4c  
+# 176.png Qh 8d  
+# 177.png 7c 3d  
+# 178.png Kh Jc  
+# 179.png Kh 4c  
+# 180.png As Ad  
+# 181.png Ah 2c  
+# 182.png 9s 5s  
+# 183.png 5s 2s  
+# 184.png 4s 3h  
+# 185.png Qs 2d  
+# 186.png Td 8c  
+# 187.png Qc 2s  
+# 188.png 8d 4c  
+# 189.png 6d 3c  
+# 190.png Kh 7c  
+# 191.png 6c 5d  
+# 192.png Qh 8d  
+# 193.png 9h 2c  
+# 194.png 8h 8c  
+# 195.png 8h 4d  
+# 196.png 9h 6s  
+# 197.png Ks Tc  
+# 198.png Kd 5s  
+# 199.png Td 9h  
+# 200.png 9d 3d  
+# 201.png 6h 5h  
+# 202.png Jc 4h  
+# 203.png Ks 8s  
+# 204.png 8s 5h  
+# 205.png 7h 5d  
+# 206.png Tc 3d  
+# 207.png 5d 2c  
+# 208.png Qs 6h  
+# 209.png Jc 9h  
+# 210.png 8h 7s  
+# 211.png 9d 7h  
+# 212.png Kh Qc  
+# 213.png 5c 4d  
+# 214.png 7h 2s  
+# 215.png 8h 7h  
+# 216.png Ac 7c  
+# 217.png 9h 3h  
+# 218.png 7c 5h  
+# 219.png 9s 7s  
+# 220.png Kc 7h  
+# 221.png 8s 5c  
+# 222.png Jd 7s  
+# 223.png Ts 5h  
+# 224.png As 8h  
+# 225.png 9d 6d  
+# 226.png 8d 4c  
+# 227.png Kc 2c  
+# 228.png Jc 2h  
+# 229.png 8c 6h  
+# 230.png Tc 6d  
+# 231.png 9d 2h  
+# 232.png Ah Ts  
+# 233.png 8s 2c  
+# 234.png Qd 8c  
+# 235.png Ts 8h  
+# 236.png 5s 2s  
+# 237.png Jd 5h  
+# 238.png As 7s  
+# 239.png Ks Tc  
+# 240.png Qs 5h  
+# 241.png As 5c  
+# 242.png Ah 8h  
+# 243.png Kc Qc  
+# 244.png Kc Qc  
+# 245.png Ah Td  
+# 246.png Qs 3s  
+# 247.png 3c 2c  
+# 248.png 9h 2s  
+# 249.png 7s 5h  
+# 250.png Kd 3d  
+# 251.png Js 8h  
+# 252.png Jd 9d  
+# 253.png 9h 8c  
+# 254.png 7s 5c  
+# 255.png Qd 6c  
+# 256.png Qh 5d  
+# 257.png Kd Js  
+# 258.png 9c 7d  
+# 259.png Th 6d  
+# 260.png Kh 3c  
+# 261.png Kc 4h  
+# 262.png 6d 2h  
+# 263.png Qh 7d  
+# 264.png Jd 3d  
+# 265.png Ah 9c  
+# 266.png 7s 7d  
+# 267.png Qc 4c  
+# 268.png 9s 3d  
+# 269.png Jd 2h  
+# 270.png As 7d  
+# 271.png Jc 5c  
+# 272.png Ad Jc  
+# 273.png 4c 3s  
+# 274.png Kh 9c  
+# 275.png Qs 8h  
+# 276.png Qc Jc  
+# 277.png 5h 5d  
+# 278.png 7c 5c  
+# 279.png 7c 4d  
+# 280.png Ks Qc  
+# 281.png Qd 4s  
+# 282.png 4c 2h  
+# 283.png Ts 9h  
+# 284.png Ad Qd  
+# 285.png Jh 8s  
+# 286.png 5d 2c  
+# 287.png As 5s  
+# 288.png 4h 3s  
+# 289.png 9d 4d  
+# 290.png Js 9c  
+# 291.png 6d 2c  
+# 292.png Kh 5d  
+# 293.png Kh 5d  
+# 294.png 9s 7h  
+# 295.png Kd 3h  
+# 296.png Kd 8h  
+# 297.png 8d 4h  
+# 298.png 7h 4s  
+# 299.png 5c 4c  
+# 300.png Qd 4d  
+# 301.png Ah Kc  
+# 302.png Kc 9c  
+# 303.png 8d 3c  
+# 304.png Kc 2h  
+# 305.png Ks 4h  
+# 306.png 4d 3d  
+# 307.png Th 6c  
+# 308.png Ks 6s  
+# 309.png Js 6h  
+# 310.png Ac Tc  
+# 311.png Ks 6d  
+# 312.png 7d 3d  
+# 313.png 5c 3s  
+# 314.png Kd 8d  
+# 315.png Qc 7d  
+# 316.png 6h 5d  
+# 317.png As 5s  
+# 318.png Jc Jd  
+# 319.png 8h 8d  
+# 320.png 9c 2h  
+# 321.png 8c 5h  
+# 322.png Ac 4c  
+# 323.png 8h 7s  
+# 324.png Qd 4h  
+# 325.png Js 3s  
+# 326.png Ad 9s  
+# 327.png 6h 5h  
+# 328.png 3s 3d  
+# 329.png Jd 7c  
+# 330.png 9h 6c  
+# 331.png Jc 3c  
+# 332.png Ac Ks  
+# 333.png 7s 2c  
+# 334.png Ad 5c  
+# 335.png Kd Jc  
+# 336.png Ah 8h  
+# 337.png Qh Jd  
+# 338.png 9s 8d  
+# 339.png 6d 5h  
+# 340.png Qh 2s  
+# 341.png Ks 8d  
+# 342.png 3h 2h  
+# 343.png Ac Qc  
+# 344.png Jc 9c  
+# 345.png Kh 3h  
+# 346.png 5c 4h  
+# 347.png Js 8h  
+# 348.png Td 5h  
+# 349.png Th 5h  
+# 350.png 7c 3s  
+# 351.png 8h 6s  
+# 352.png Kc 4c  
+# 353.png Th 6s  
+# 354.png Ah 8d  
+# 355.png As Jh  
+# 356.png Qd 5d  
+# 357.png Ts 5h  
+# 358.png 5d 3d  
+# 359.png Qc 6d  
+# 360.png Ad Ks  
+# 361.png 6h 4h  
+# 362.png As Th  
+# 363.png 6d 5d  
+# 364.png Qd 9c  
+# 365.png 7s 4s  
+# 366.png 8h 2s  
+# 367.png 8d 5h  
+# 368.png Jh 3d  
+# 369.png Js Jc  
+# 370.png Ks 4c  
+# 371.png 9s 4d  
+# 372.png Tc 9h  
+# 373.png 9d 6d  
+# 374.png Th 4s  
+# 375.png Ac 6c  
+# 376.png Kd 9c  
+# 377.png As 8s  
+# 378.png Td 2h  
+# 379.png 7h 3c  
+# 380.png Qh 3s  
+# 381.png 9c 4s  
+# 382.png Js Th  
+# 383.png 7d 5c  
+# 384.png Js 8s  
+# 385.png Js 2h  
+# 386.png Jh 9h  
+# 387.png 9c 3d  
+# 388.png Ah 8c  
+# 389.png Ks 2h  
+# 390.png Kc Td  
+# 391.png Qs 7d  
+# 392.png Ac Ad  
+# 393.png Qh Jd  
+# 394.png Tc 3c  
+# 395.png Qh 3d  
+# 396.png Ts Th  
+397.png Ah Tc  
+398.png 3s 2c  
+399.png 6h 3c  
+400.png Qc 4c  
+401.png Ts 5h  
+402.png Jh 4s  
+403.png Th 3c  
+404.png Qs 7c  
+405.png 5c 3d  
+406.png Ad 2h  
+407.png Qh 9c  
+408.png Js 7c  
+409.png 8s 4h  
+410.png 7h 3s  
+411.png Ks 6c  
+412.png Th 3c 
+413.png 6d 5h  
+414.png 9d 7h  
+415.png 6c 2d  
+416.png Qc 5h  
+417.png Jd 8h  
+418.png 3c 2d  
+419.png 9d 6d  
+420.png 7d 2d  
+421.png 4d 3s  
+422.png Ac Ts  
+423.png Ks 6h  
+424.png Qd 5s  
+425.png 5s 2c  
+426.png Td 2d  
+427.png 4h 4d
+428.png 9s 3s  
+429.png As 2s
+430.png 9d 6d
+431.png 7d 6d
+432.png 8s 2s
+433.png Qh Js
+434.png Kd Qc
+435.png 3s 3h
+436.png 8h 5h
+# 437.png Th 2h  <- VERIFY AND UNCOMMENT
+# 438.png 9s 4c  <- VERIFY AND UNCOMMENT
+# 439.png 9h 5h  <- VERIFY AND UNCOMMENT
+# 440.png 8c 6c  <- VERIFY AND UNCOMMENT
+# 441.png Th Tc  <- VERIFY AND UNCOMMENT
+# 442.png Kh 4c  <- VERIFY AND UNCOMMENT
+# 443.png Ah 6d  <- VERIFY AND UNCOMMENT
+# 444.png 6h 2h  <- VERIFY AND UNCOMMENT
+# 445.png 9s 8c  <- VERIFY AND UNCOMMENT
+# 446.png Th 8d  <- VERIFY AND UNCOMMENT
+# 447.png 7c 2s  <- VERIFY AND UNCOMMENT
+# 448.png 2s 3h  <- VERIFY AND UNCOMMENT
+# 449.png Ks 5s  <- VERIFY AND UNCOMMENT
+# 450.png 8d 3h  <- VERIFY AND UNCOMMENT
+# 451.png 9h 7h  <- VERIFY AND UNCOMMENT
+# 452.png Qh 9c  <- VERIFY AND UNCOMMENT
+# 453.png Jh 6h  <- VERIFY AND UNCOMMENT
+# 454.png Jd Jc  <- VERIFY AND UNCOMMENT
+# 455.png 8h 7h  <- VERIFY AND UNCOMMENT
+# 456.png 3s 3c  <- VERIFY AND UNCOMMENT
+# 457.png 8s 5s  <- VERIFY AND UNCOMMENT
+# 458.png Ah 5h  <- VERIFY AND UNCOMMENT
+# 459.png 2s 2c  <- VERIFY AND UNCOMMENT
+# 460.png 9s 4c  <- VERIFY AND UNCOMMENT
+# 461.png Kc 2s  <- VERIFY AND UNCOMMENT
+# 462.png Td 2s  <- VERIFY AND UNCOMMENT
+# 463.png Qd 3d  <- VERIFY AND UNCOMMENT
+# 464.png Jh 4c  <- VERIFY AND UNCOMMENT
+# 465.png Ad Kh  <- VERIFY AND UNCOMMENT
+# 466.png 9h 4h  <- VERIFY AND UNCOMMENT
+# 467.png Qh Th  <- VERIFY AND UNCOMMENT
+# 468.png Qd 9d  <- VERIFY AND UNCOMMENT
+# 469.png Ac 6c  <- VERIFY AND UNCOMMENT
+# 470.png 7d 3h  <- VERIFY AND UNCOMMENT
+# 471.png 6h 2h  <- VERIFY AND UNCOMMENT
+# 472.png 5d 3s  <- VERIFY AND UNCOMMENT
+# 473.png Qd 4d  <- VERIFY AND UNCOMMENT
+# 474.png Td Th  <- VERIFY AND UNCOMMENT
+# 475.png 6h 4h  <- VERIFY AND UNCOMMENT
+# 476.png Qd 7c  <- VERIFY AND UNCOMMENT
+# 477.png 8s 7s  <- VERIFY AND UNCOMMENT
+# 478.png Td Th  <- VERIFY AND UNCOMMENT
+# 479.png 3d 2c  <- VERIFY AND UNCOMMENT
+# 480.png As 3d  <- VERIFY AND UNCOMMENT
+# 481.png As 3s  <- VERIFY AND UNCOMMENT
+# 482.png Ad Qd  <- VERIFY AND UNCOMMENT
+# 483.png Ad Td  <- VERIFY AND UNCOMMENT
+# 484.png Qd Td  <- VERIFY AND UNCOMMENT
+# 485.png 7d 4h  <- VERIFY AND UNCOMMENT
+# 486.png Kc 8d  <- VERIFY AND UNCOMMENT
+# 487.png Tc 5s  <- VERIFY AND UNCOMMENT
+# 488.png 9h 6h  <- VERIFY AND UNCOMMENT
+# 489.png Ah 9s  <- VERIFY AND UNCOMMENT
+# 490.png Qd Js  <- VERIFY AND UNCOMMENT
+# 491.png Ad 4d  <- VERIFY AND UNCOMMENT
+# 492.png Qh Jd  <- VERIFY AND UNCOMMENT
+# 493.png 5h 5d  <- VERIFY AND UNCOMMENT
+# 494.png Th 2h  <- VERIFY AND UNCOMMENT
+# 495.png 6s 3c  <- VERIFY AND UNCOMMENT
+# 496.png 8c 5s  <- VERIFY AND UNCOMMENT
+# 497.png Ks Qc  <- VERIFY AND UNCOMMENT
+# 498.png 4c 2c  <- VERIFY AND UNCOMMENT
+# 499.png Qc 2c  <- VERIFY AND UNCOMMENT
+# 500.png Jd 6h  <- VERIFY AND UNCOMMENT
+# 501.png As 2h  <- VERIFY AND UNCOMMENT
+# 502.png Td Th  <- VERIFY AND UNCOMMENT
+# 503.png As 9d  <- VERIFY AND UNCOMMENT
+# 504.png Ah Tc  <- VERIFY AND UNCOMMENT
+# 505.png Kc Js  <- VERIFY AND UNCOMMENT
+# 506.png Ah Kd  <- VERIFY AND UNCOMMENT
+# 507.png 7s 4c  <- VERIFY AND UNCOMMENT
+# 508.png Ad Qd  <- VERIFY AND UNCOMMENT
+# 509.png Ah 5h  <- VERIFY AND UNCOMMENT
+# 510.png Td 6d  <- VERIFY AND UNCOMMENT
+# 511.png 4c 2c  <- VERIFY AND UNCOMMENT
+# 512.png Th 2c  <- VERIFY AND UNCOMMENT
+# 513.png 7s 7c  <- VERIFY AND UNCOMMENT
+# 514.png Ts 2s  <- VERIFY AND UNCOMMENT
+# 515.png Kh Td  <- VERIFY AND UNCOMMENT
+# 516.png Kc 5c  <- VERIFY AND UNCOMMENT
+# 517.png 4d 3s  <- VERIFY AND UNCOMMENT
+# 518.png Ah Qd  <- VERIFY AND UNCOMMENT
+# 519.png 7c 6s  <- VERIFY AND UNCOMMENT
+# 520.png 9s 8c  <- VERIFY AND UNCOMMENT
+# 521.png 7d 5d  <- VERIFY AND UNCOMMENT
+# 522.png Ah 4c  <- VERIFY AND UNCOMMENT
+# 523.png Jd 6h  <- VERIFY AND UNCOMMENT
+# 524.png 8d 7s  <- VERIFY AND UNCOMMENT
+# 525.png Jh 6h  <- VERIFY AND UNCOMMENT
+# 526.png Qc 5d  <- VERIFY AND UNCOMMENT
+# 527.png 9s 7s  <- VERIFY AND UNCOMMENT
+# 528.png 5d 3d  <- VERIFY AND UNCOMMENT
+# 529.png Jh Td  <- VERIFY AND UNCOMMENT
+# 530.png 9c 4c  <- VERIFY AND UNCOMMENT
+# 531.png Qs 2h  <- VERIFY AND UNCOMMENT
+# 532.png Jc 9s  <- VERIFY AND UNCOMMENT
+# 533.png Jd Td  <- VERIFY AND UNCOMMENT
+# 534.png Qd 3h  <- VERIFY AND UNCOMMENT
+# 535.png Td 9d  <- VERIFY AND UNCOMMENT
+# 536.png Jd 7s  <- VERIFY AND UNCOMMENT
+# 537.png Ks 4h  <- VERIFY AND UNCOMMENT
+# 538.png Ad Tc  <- VERIFY AND UNCOMMENT
+# 539.png 5c 3h  <- VERIFY AND UNCOMMENT
+# 540.png Ah 6s  <- VERIFY AND UNCOMMENT
+# 541.png Qd Jd  <- VERIFY AND UNCOMMENT
+# 542.png Ah 6s  <- VERIFY AND UNCOMMENT
+# 543.png 7s 2s  <- VERIFY AND UNCOMMENT
+# 544.png Qc Tc  <- VERIFY AND UNCOMMENT
+# 545.png 6s 3h  <- VERIFY AND UNCOMMENT
+# 546.png Ac Ts  <- VERIFY AND UNCOMMENT
+# 547.png As 6s  <- VERIFY AND UNCOMMENT
+# 548.png Qh Js  <- VERIFY AND UNCOMMENT
+# 549.png 6h 2c  <- VERIFY AND UNCOMMENT
+# 550.png Ac 7c  <- VERIFY AND UNCOMMENT
+# 551.png 9h 8h  <- VERIFY AND UNCOMMENT
+# 552.png Ks 6h  <- VERIFY AND UNCOMMENT
+# 553.png Ac 9h  <- VERIFY AND UNCOMMENT
+# 554.png Kh 6c  <- VERIFY AND UNCOMMENT
+# 555.png 6s 5d  <- VERIFY AND UNCOMMENT
+# 556.png Tc 9s  <- VERIFY AND UNCOMMENT
+# 557.png Ad 2c  <- VERIFY AND UNCOMMENT
+# 558.png Ah 5h  <- VERIFY AND UNCOMMENT
+# 559.png 9d 2d  <- VERIFY AND UNCOMMENT
+# 560.png 8d 2h  <- VERIFY AND UNCOMMENT
+# 561.png 6c 5c  <- VERIFY AND UNCOMMENT
+# 562.png Ad Jd  <- VERIFY AND UNCOMMENT
+# 563.png 9c 7d  <- VERIFY AND UNCOMMENT
+# 564.png 8d 6s  <- VERIFY AND UNCOMMENT
+# 565.png Qh 3h  <- VERIFY AND UNCOMMENT
+# 566.png Ks Qd  <- VERIFY AND UNCOMMENT
+# 567.png 9c 4c  <- VERIFY AND UNCOMMENT
+# 568.png As Js  <- VERIFY AND UNCOMMENT
+# 569.png Ks 8c  <- VERIFY AND UNCOMMENT
+# 570.png 5s 4d  <- VERIFY AND UNCOMMENT
+# 571.png Ac Ad  <- VERIFY AND UNCOMMENT
+# 572.png Th 5c  <- VERIFY AND UNCOMMENT
+# 573.png Ac 2h  <- VERIFY AND UNCOMMENT
+# 574.png Ac Th  <- VERIFY AND UNCOMMENT
+# 575.png 8c 8d  <- VERIFY AND UNCOMMENT
+# 576.png 5s 3d  <- VERIFY AND UNCOMMENT
+# 577.png Ac Ts  <- VERIFY AND UNCOMMENT
+# 578.png 9s 9h  <- VERIFY AND UNCOMMENT
+# 579.png Ts Th  <- VERIFY AND UNCOMMENT
+# 580.png Th 9d  <- VERIFY AND UNCOMMENT
+# 581.png 5s 5h  <- VERIFY AND UNCOMMENT
+# 582.png Jh 4h  <- VERIFY AND UNCOMMENT
+# 583.png 5h 2s  <- VERIFY AND UNCOMMENT
+# 584.png Ts 9h  <- VERIFY AND UNCOMMENT
+# 585.png 9d 8c  <- VERIFY AND UNCOMMENT
+# 586.png Ad Qs  <- VERIFY AND UNCOMMENT
+# 587.png 7c 5h  <- VERIFY AND UNCOMMENT
+# 588.png Ah 9h  <- VERIFY AND UNCOMMENT
+# 589.png 6s 6d  <- VERIFY AND UNCOMMENT
+# 590.png 6s 6d  <- VERIFY AND UNCOMMENT
+# 591.png Qh Jc  <- VERIFY AND UNCOMMENT
+# 592.png Jc Ts  <- VERIFY AND UNCOMMENT
+# 593.png Jc 6h  <- VERIFY AND UNCOMMENT
+# 594.png Qd 5c  <- VERIFY AND UNCOMMENT
+# 595.png Js 6h  <- VERIFY AND UNCOMMENT
+# 596.png Ks 7c  <- VERIFY AND UNCOMMENT
+# 597.png Qd 6h  <- VERIFY AND UNCOMMENT
+# 598.png 9c 3c  <- VERIFY AND UNCOMMENT
+# 599.png 6h 3c  <- VERIFY AND UNCOMMENT
+# 600.png 8d 6d  <- VERIFY AND UNCOMMENT
+# 601.png 9d 7c  <- VERIFY AND UNCOMMENT
+# 602.png 5s 5c  <- VERIFY AND UNCOMMENT
+# 603.png Qc 8s  <- VERIFY AND UNCOMMENT
+# 604.png 7s 5d  <- VERIFY AND UNCOMMENT
+# 605.png Th 3h  <- VERIFY AND UNCOMMENT
+# 606.png 8d 4c  <- VERIFY AND UNCOMMENT
+# 607.png Qc 4h  <- VERIFY AND UNCOMMENT
+# 608.png Qs 3c  <- VERIFY AND UNCOMMENT
+# 609.png 9c 8h  <- VERIFY AND UNCOMMENT
+# 610.png 7c 3c  <- VERIFY AND UNCOMMENT
+# 611.png Ac Ts  <- VERIFY AND UNCOMMENT
+# 612.png Qc Th  <- VERIFY AND UNCOMMENT
+# 613.png Qh 9s  <- VERIFY AND UNCOMMENT
+# 614.png Js 7s  <- VERIFY AND UNCOMMENT
+# 615.png Ad Qc  <- VERIFY AND UNCOMMENT
+# 616.png Jc 9h  <- VERIFY AND UNCOMMENT
+# 617.png Qs 5s  <- VERIFY AND UNCOMMENT
+# 618.png Ah 6s  <- VERIFY AND UNCOMMENT
+# 619.png Kh Ts  <- VERIFY AND UNCOMMENT
+# 620.png 9s 8h  <- VERIFY AND UNCOMMENT
+# 621.png 9d 6s  <- VERIFY AND UNCOMMENT
+# 622.png Jh 5s  <- VERIFY AND UNCOMMENT
+# 623.png Qs 5c  <- VERIFY AND UNCOMMENT
+# 624.png As 7h  <- VERIFY AND UNCOMMENT
+# 625.png 8h 3s  <- VERIFY AND UNCOMMENT
+# 626.png 9h 6s  <- VERIFY AND UNCOMMENT
+# 627.png 8c 7d  <- VERIFY AND UNCOMMENT
+# 628.png 8s 6h  <- VERIFY AND UNCOMMENT
+# 629.png Td 4d  <- VERIFY AND UNCOMMENT
+# 630.png Qs 7c  <- VERIFY AND UNCOMMENT
+# 631.png Th 9h  <- VERIFY AND UNCOMMENT
+# 632.png 3s 2h  <- VERIFY AND UNCOMMENT
+# 633.png As 2s  <- VERIFY AND UNCOMMENT
+# 634.png Qc 8s  <- VERIFY AND UNCOMMENT
+# 635.png 6h 5c  <- VERIFY AND UNCOMMENT

@@ -1,0 +1,7 @@
+numpy
+Pillow
+torch
+torchvision
+pyobjc-framework-Quartz
+pytesseract
+pynput
