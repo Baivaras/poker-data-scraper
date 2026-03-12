@@ -128,10 +128,20 @@ class PokerLogger:
                   if action.amount_dollars is not None else "")
         colour = "yellow" if action.seat == 0 else ""
 
-        if self.verbose and action.stack_before is not None and action.stack_after is not None:
-            stack_info = (f"  [stack {self._fmt_amount(action.stack_before)}BB"
-                          f" → {self._fmt_amount(action.stack_after)}BB"
-                          f"  Δ{self._fmt_amount(action.stack_before - action.stack_after)}BB]")
+        if self.verbose:
+            parts = []
+            if action.stack_before is not None and action.stack_after is not None:
+                parts.append(
+                    f"stack {self._fmt_amount(action.stack_before)}BB"
+                    f" → {self._fmt_amount(action.stack_after)}BB"
+                    f"  Δ{self._fmt_amount(action.stack_before - action.stack_after)}BB"
+                )
+            if action.street_total is not None:
+                total_str = f"street total {self._fmt_amount(action.street_total)}BB"
+                if action.street_total_dollars is not None:
+                    total_str += f" (${self._fmt_amount(action.street_total_dollars)})"
+                parts.append(total_str)
+            stack_info = f"  [{' | '.join(parts)}]" if parts else ""
         else:
             stack_info = ""
 

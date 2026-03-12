@@ -27,6 +27,7 @@ from detection.card_detector import detect_hero_cards
 from core.config import TrackerConfig, crop_region, load_config
 from core.hand_state import ActionRound, HandState, PlayerAction, Street
 from core.models import HeroCardsResult
+from detection.region_cache import RegionCache
 from detection.street_detector import StreetDetector
 from tracking.table_scanner import TableScanner
 from core.table_state import TableState
@@ -74,9 +75,10 @@ class GameTracker:
         self._on_your_turn     = on_your_turn     or (lambda *a: None)
         self._on_hand_complete = on_hand_complete or (lambda *a: None)
 
-        self._scanner  = TableScanner(cfg, room)
-        self._streets  = StreetDetector(debounce=2)
-        self._actions  = ActionDetector(cfg, debug=debug)
+        self._scanner      = TableScanner(cfg, room)
+        self._streets      = StreetDetector(debounce=2)
+        self._actions      = ActionDetector(cfg, debug=debug)
+        self._btn_cache    = RegionCache()   # skips saturation check when button region unchanged
 
         self._state:        _State           = _State.IDLE
         self._hand_state:   Optional[HandState] = None
@@ -261,9 +263,12 @@ class GameTracker:
             self._route_action(action)
             self._on_player_action(action)
 
-        # ── 4. YOUR_TURN detection (action buttons) ───────────────────────────
+        # ── 4. YOUR_TURN detection (action buttons, cached) ───────────────────
         if not hs.hero_folded:
-            btn_visible = _action_buttons_visible(img, self._cfg)
+            if self._btn_cache.changed(img, self._cfg.regions.action):
+                btn_visible = _action_buttons_visible(img, self._cfg)
+            else:
+                btn_visible = self._btn_was_visible
 
             if btn_visible and not self._btn_was_visible:
                 # Buttons just appeared → hero's turn
@@ -291,23 +296,25 @@ class GameTracker:
     # ── BB annotation ─────────────────────────────────────────────────────────
 
     def _fill_bb(self, action: PlayerAction) -> None:
-        """Fill amount_bb and amount_dollars in-place.
+        """Fill amount_bb, amount_dollars, street_total_bb, street_total_dollars in-place.
 
         The table always displays stacks/bets in BBs, so the OCR value IS the
         BB amount.  Dollar conversion uses bb_amount (dollar value of 1 BB)
         parsed from the window title.
         """
-        if action.amount is None:
-            return
-        # amount is already in BBs — just copy it
-        if action.amount_bb is None:
-            action.amount_bb = action.amount
-        # dollar conversion: amount_BB × dollar_per_BB
-        if action.amount_dollars is None and \
-                self._hand_state and self._hand_state.bb_amount:
-            action.amount_dollars = round(
-                action.amount * self._hand_state.bb_amount, 2
-            )
+        bb = self._hand_state.bb_amount if self._hand_state else None
+
+        if action.amount is not None:
+            if action.amount_bb is None:
+                action.amount_bb = action.amount
+            if action.amount_dollars is None and bb:
+                action.amount_dollars = round(action.amount * bb, 2)
+
+        if action.street_total is not None:
+            if action.street_total_bb is None:
+                action.street_total_bb = action.street_total
+            if action.street_total_dollars is None and bb:
+                action.street_total_dollars = round(action.street_total * bb, 2)
 
     # ── round accumulation ────────────────────────────────────────────────────
 
@@ -356,6 +363,7 @@ class GameTracker:
         self._round_counter       = 0
         self._actions.reset()
         self._streets.reset()
+        self._btn_cache.reset()
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────

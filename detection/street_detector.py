@@ -12,6 +12,7 @@ from PIL import Image
 
 from core.config import TrackerConfig, crop_region
 from core.hand_state import Street
+from detection.region_cache import RegionCache
 
 BOARD_VARIANCE_THRESHOLD = 40.0  # same as card detector
 
@@ -58,6 +59,9 @@ class StreetDetector:
         self._current_count = 0
         self._candidate     = 0
         self._candidate_run = 0
+        self._region_cache  = RegionCache()
+        # Last known card presence per slot index — used when region is cached
+        self._slot_present: dict = {}
 
     @property
     def current_street(self) -> Street:
@@ -67,8 +71,17 @@ class StreetDetector:
         """Read board slots and return (street, changed).
 
         changed=True only on the frame a stable street transition is confirmed.
+        Board slot variance checks are skipped when the slot pixels are unchanged.
         """
-        count = count_board_cards(img, cfg)
+        count = 0
+        for i, region in enumerate(cfg.regions.board):
+            if self._region_cache.changed(img, region):
+                present = _slot_has_card(img, region)
+                self._slot_present[i] = present
+            else:
+                present = self._slot_present.get(i, False)
+            if present:
+                count += 1
 
         if count != self._candidate:
             self._candidate     = count
@@ -86,3 +99,5 @@ class StreetDetector:
         self._current_count = 0
         self._candidate     = 0
         self._candidate_run = 0
+        self._region_cache.reset()
+        self._slot_present.clear()

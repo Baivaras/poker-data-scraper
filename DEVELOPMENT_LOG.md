@@ -191,9 +191,143 @@ HAND_ACTIVE → (board clears + hero absent ≥3 frames) → HAND_COMPLETE → I
 
 ---
 
+---
+
+## Post-Phase 5 — Card Detection Accuracy & Tooling
+
+### Problem: Board card detection at 20–30% accuracy
+
+Board slot crops (~60×81 px, aspect ratio ~0.74) were classified by a model trained
+exclusively on hero card crops (~67×126, ratio ~0.53). After resizing both to 128×192,
+the distortion difference caused consistent rank misclassifications (8→6, 5→3, K→4, etc.).
+Suit detection was unaffected because suit symbols are more distinctive shapes.
+
+### Fix: Combined training dataset
+
+Created `NN/train_card_model.py` — trains `card_detector_nn.pth` on both:
+- **Hero crops**: extracted from `tests/` + `label_hands.txt` (618 images × 2 cards)
+- **Board crops**: extracted from `captures/` + `label_cards.json` (labeled board slots)
+
+Board crops are repeated to balance the dataset. Result after 60 epochs on MPS:
+- Hero accuracy: **100%** (23/23 labeled images)
+- Board accuracy: **100%** (23/23 labeled images, up from 30%)
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `label_cards.py` | Interactive labeller — opens image, shows detection, prompts hero + board |
+| `test_cards.py` | Accuracy test with separate Hero? / Board? columns and per-image confidence |
+| `NN/train_card_model.py` | Combined hero + board training script |
+
+### Key Design: Label format
+`label_cards.json` stores `{"filename": {"hero": ["Qs","5d"] | null, "board": [...] | null}}`.
+Incremental saves after every image. `--redo` flag re-labels already-labelled images.
+
+---
+
+## Post-Phase 5 — Logger Refactor
+
+All ANSI formatting and event handler functions extracted from `main.py` into
+`tracking/logger.py` as a `PokerLogger` class.
+
+| Before | After |
+|--------|-------|
+| Module-level colour constants + free functions in `main.py` | `PokerLogger` class with `verbose` attribute |
+| `_verbose` global | `logger.verbose` instance attribute |
+| `_TeeWriter` + `_setup_log_file()` in `main.py` | `logger.setup_log_file()` method |
+| `on_hand_start` etc. as free functions | `logger.on_hand_start` etc. as methods |
+
+`PokerLogger.colour(text, name)` is a public static method reused by `test_cards.py`
+(replacing that file's own ANSI constant block).
+
+Live event output additions:
+- `HERO CARDS` line on hand start — bold, suit-coloured (red for h/d, white for s/c)
+- Flop/Turn/River separator lines show board cards inline with suit colouring
+- `--verbose` action lines now include `street total XBB ($Y)` alongside stack delta
+
+---
+
+## Post-Phase 5 — Street-Level Bet Tracking
+
+### Problem
+`action.amount` records chips added in a single action. For a raise → reraise → call
+sequence on a street, there was no way to know a seat's total investment in the pot
+for that street.
+
+### Implementation
+
+Added `street_total` / `street_total_bb` / `street_total_dollars` to `PlayerAction`.
+
+`ActionDetector` tracks `_street_committed: Dict[int, float]` — total chips put in
+per seat this street. Updated on every BET/CALL/RAISE/ALL_IN. Reset in
+`reset_street_bets()` on street change and in `reset()` on hand end.
+
+CHECK and FOLD carry the seat's current `street_total` (no new chips added, but the
+running total is still useful context for the consumer).
+
+`GameTracker._fill_bb()` fills `street_total_bb` and `street_total_dollars` using
+the same `bb_amount` multiplier as `amount_dollars`.
+
+---
+
+## Post-Phase 5 — Detection Performance Optimisations
+
+### Motivation
+At 150ms poll rate, every frame was running all detectors regardless of whether the
+screen had changed. Most frames during a hand are static (players thinking, animations
+settling). The goal: eliminate redundant work without changing detection accuracy.
+
+### 1 — Region hash cache (`detection/region_cache.py`)
+
+`RegionCache` stores an 8×8 grayscale thumbnail hash per region coordinate tuple.
+`cache.changed(img, region)` returns `True` only when pixels differ from the previous
+call. First call always returns `True` (safe default).
+
+**Rule**: stack and bet regions are never passed to the cache — they are the primary
+action signal and must always be re-read.
+
+Applied to:
+- **Fold detection** (`action_detector.py`): `_has_cards()` variance check skipped
+  when the cards region hash is unchanged. On static frames this is ~0ms instead of
+  a numpy variance op per seat.
+- **Board slot variance** (`street_detector.py`): each of the 5 slots tracks its own
+  hash. Variance check skipped when slot pixels are identical to the last frame. Last
+  known presence is reused. Eliminates 5 numpy ops per frame when board is static.
+- **Action button saturation** (`game_tracker.py`): `_action_buttons_visible()` skipped
+  when the button region is unchanged. Previous visibility state reused instead.
+
+### 2 — Action detection runs on every frame
+
+Action detection (`_actions.detect()`) runs unconditionally on every frame, including
+preflop and while action buttons are visible. An earlier attempt to skip detection while
+buttons were on screen caused missed preflop actions (blind posts, raises before hero acts)
+and was reverted.
+
+Community card detection is the only thing that is gated — it only runs on confirmed
+street transitions (`changed=True`), never on every frame.
+
+### 3 — Parallel stack OCR (reverted)
+
+A `ThreadPoolExecutor` was added to read all seat stacks concurrently. It was removed
+because the threading overhead introduced timing issues and made debugging harder with
+no measurable benefit at the 150ms poll rate. The sequential loop is simpler and reliable.
+
+### Files Created / Modified
+
+| File | Change |
+|------|--------|
+| `detection/region_cache.py` | New — `RegionCache` class |
+| `detection/action_detector.py` | Added `RegionCache` for fold detection only; sequential stack reads retained |
+| `detection/street_detector.py` | Added `RegionCache` per board slot in `StreetDetector` |
+| `tracking/game_tracker.py` | Added `RegionCache` for button region (YOUR_TURN detection only) |
+
+---
+
 ## Pending / Next Phases
 
 | Phase | Goal |
 |-------|------|
 | 6 | Data aggregation & output (hand history JSON, WebSocket/live feed, GTO integration) |
+| Improvement | CHECK detection: replace `cards_present` visual signal with explicit `_folded_seats` set derived from detected FOLD actions |
+| Improvement | Hand end detection: tail PokerStars hand history file for ground-truth result (winner, pot size, showdown cards) |
 | Validation | Collect Phase 3–5 test images from live session → run `test_game_tracker.py` |

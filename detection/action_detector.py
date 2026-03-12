@@ -17,6 +17,7 @@ from PIL import Image
 from core.config import TrackerConfig, crop_region
 from core.hand_state import ActionType, PlayerAction, Street
 from detection.ocr import read_number, read_stack
+from detection.region_cache import RegionCache
 
 # Fraction of stack that can change due to OCR noise without triggering an action.
 # e.g. 0.05 = ignore deltas < 5% of last known stack (covers minor misreads).
@@ -55,6 +56,8 @@ class ActionDetector:
         self._seats: Dict[int, _SeatState] = {}
         self._current_call_amount: float   = 0.0
         self._last_actor: Optional[int]    = None   # seat that last made a real action
+        self._street_committed: Dict[int, float] = {}  # total chips committed per seat this street
+        self._region_cache = RegionCache()   # skips fold checks when cards region unchanged
 
     def _dbg(self, msg: str) -> None:
         if self._debug:
@@ -100,35 +103,36 @@ class ActionDetector:
 
         # ── opponent seats ────────────────────────────────────────────────────
         for i, seat_region in enumerate(cfg.regions.seats):
-            seat_num  = i + 1
+            seat_num   = i + 1
             seat_state = self._seats.get(seat_num)
             if seat_state is None:
                 continue
 
-            # Fold detection: cards region variance dropped
+            # Fold detection — skip variance check when cards region is unchanged
             if "cards" in seat_region:
-                cards_now = _has_cards(img, seat_region["cards"])
-                if seat_state.cards_present and not cards_now:
-                    seat_state.cards_present = False
-                    actions.extend(self._infer_checks(seat_num, street, usernames))
-                    actions.append(PlayerAction(
-                        seat      = seat_num,
-                        username  = usernames.get(seat_num),
-                        action    = "FOLD",
-                        amount    = None,
-                        amount_bb = None,
-                        street    = street,
-                        timestamp = _now(),
-                    ))
-                    self._last_actor = seat_num
-                    continue
+                if not seat_state.cards_present:
+                    continue   # already folded
+                if self._region_cache.changed(img, seat_region["cards"]):
+                    if not _has_cards(img, seat_region["cards"]):
+                        seat_state.cards_present = False
+                        actions.extend(self._infer_checks(seat_num, street, usernames))
+                        actions.append(PlayerAction(
+                            seat      = seat_num,
+                            username  = usernames.get(seat_num),
+                            action    = "FOLD",
+                            amount    = None,
+                            amount_bb = None,
+                            street    = street,
+                            timestamp = _now(),
+                        ))
+                        self._last_actor = seat_num
+                        continue
+            elif not seat_state.cards_present:
+                continue   # already folded, no cards region to re-check
 
-            if not seat_state.cards_present:
-                continue   # already folded
-
-            # Stack delta detection
             if "stack" not in seat_region:
                 continue
+
             current_stack = read_stack(crop_region(img, seat_region["stack"]))
             self._dbg(f"detect  seat{seat_num}  ocr={current_stack}  last={seat_state.last_stack}")
             action = self._check_delta(
@@ -141,9 +145,7 @@ class ActionDetector:
                 actions.append(action)
                 self._last_actor = seat_num
 
-        # ── hero (seat 0) ─────────────────────────────────────────────────────
-        # Hero action is detected externally via action buttons disappearing.
-        # Here we just keep hero's stack fresh for delta calculation later.
+        # ── hero stack refresh ────────────────────────────────────────────────
         if cfg.regions.hero_stack:
             current = read_stack(crop_region(img, cfg.regions.hero_stack))
             if current is not None:
@@ -173,6 +175,9 @@ class ActionDetector:
 
         if action not in ("FOLD", "CHECK"):
             self._update_call_amount(delta)
+            self._street_committed[0] = self._street_committed.get(0, 0.0) + delta
+
+        street_total = self._street_committed.get(0, 0.0) or None
 
         self._seats[0].last_stack = current
         return PlayerAction(
@@ -183,6 +188,7 @@ class ActionDetector:
             amount_bb    = None,
             street       = street,
             timestamp    = _now(),
+            street_total = street_total,
             stack_before = stack_before,
             stack_after  = current,
         )
@@ -191,6 +197,7 @@ class ActionDetector:
         """Call on every street change — resets current call amount and action order."""
         self._current_call_amount = 0.0
         self._last_actor          = None
+        self._street_committed    = {}
 
     def hero_stack_now(self, img: Image.Image) -> Optional[float]:
         """Read hero's current stack (for snapshotting before hero acts)."""
@@ -202,6 +209,8 @@ class ActionDetector:
         self._seats                = {}
         self._current_call_amount  = 0.0
         self._last_actor           = None
+        self._street_committed     = {}
+        self._region_cache.reset()
 
     # ── internals ─────────────────────────────────────────────────────────────
 
@@ -319,9 +328,15 @@ class ActionDetector:
 
         if action not in ("FOLD", "CHECK"):
             self._update_call_amount(delta)
+            self._street_committed[seat_num] = (
+                self._street_committed.get(seat_num, 0.0) + (confirmed_amount or delta)
+            )
+
+        street_total = self._street_committed.get(seat_num, 0.0) or None
 
         stack_before = seat_state.last_stack
-        self._dbg(f"  seat{seat_num}  ACTION={action}  amount={confirmed_amount}  call_amt={self._current_call_amount:.0f}")
+        self._dbg(f"  seat{seat_num}  ACTION={action}  amount={confirmed_amount}  "
+                  f"street_total={street_total}  call_amt={self._current_call_amount:.0f}")
         seat_state.last_stack    = current
         seat_state.pending_delta = None
         seat_state.pending_run   = 0
@@ -334,6 +349,7 @@ class ActionDetector:
             amount_bb    = None,
             street       = street,
             timestamp    = _now(),
+            street_total = street_total,
             stack_before = stack_before,
             stack_after  = current,
         )

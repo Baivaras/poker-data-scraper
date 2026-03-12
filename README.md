@@ -226,9 +226,10 @@ poker-tracker/
 │   ├── card_detector.py      #   Variance gate → NN → HeroCardsResult
 │   ├── dealer_detector.py    #   Template-match dealer chip across seat regions
 │   ├── ocr.py                #   Tesseract wrappers: read_text(), read_number(), read_stack()
-│   ├── action_detector.py    #   Stack delta → PlayerAction events, CHECK inference
+│   ├── action_detector.py    #   Stack delta → PlayerAction events, CHECK inference, parallel OCR
 │   ├── bb_detector.py        #   BB detection from window title or pot OCR
-│   ├── board_detector.py     #   Community card detection
+│   ├── board_detector.py     #   Community card detection (per-slot hash cache)
+│   ├── region_cache.py       #   RegionCache — skip detection when region pixels unchanged
 │   └── street_detector.py    #   Board slot variance → Street (PREFLOP/FLOP/TURN/RIVER)
 │
 ├── tracking/                 # State machines and orchestrators
@@ -254,6 +255,30 @@ poker-tracker/
     ├── card_detector_nn.pth      # Trained weights — hero + board crops (rank + suit)
     └── corner_card_nn.pth        # Trained weights — corner crop variant
 ```
+
+---
+
+## Detection pipeline & performance
+
+Each live frame goes through a fixed sequence of detectors. The table below shows
+which ones run, when they are skipped, and what caching applies.
+
+| Detector | Runs when | Skipped when | Caching |
+|---|---|---|---|
+| Street detector (board variance) | Every frame | — | Per-slot region hash — skips numpy variance if slot pixels unchanged |
+| Hero card detector (NN) | Every frame | Variance gate fails | Full-crop perceptual hash — skips NN inference when pixels unchanged |
+| Board card detector (NN) | Street transition only | Street didn't change | Per-slot perceptual hash — skips NN when slot unchanged |
+| Opponent fold detection (variance) | Every frame | Cards region unchanged | Region hash cache — skips variance check on static frames |
+| Opponent stack OCR | Every frame | — | **Not cached** — always re-read (primary action signal) |
+| Opponent action detection | Every frame | — | — |
+| Action button visibility (saturation) | Every frame | Region unchanged | Region hash cache — skips saturation scan when pixels unchanged |
+| Hero action detection (stack delta) | Buttons just disappeared | — | — |
+
+### Region hash cache (`detection/region_cache.py`)
+
+`RegionCache` stores an 8×8 grayscale thumbnail hash per region. `cache.changed(img, region)`
+returns `True` only when the pixel content differs from the previous call. Stack and bet
+regions are excluded — they must always be re-read as they are the primary action signal.
 
 ---
 

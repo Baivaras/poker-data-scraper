@@ -22,26 +22,32 @@ class PlayerAction:
     seat:           int             # 0 = hero, 1-5 = opponent seat
     username:       Optional[str]
     action:         ActionType
-    amount:         Optional[float] # amount in BBs — raw OCR value (None for CHECK/FOLD)
+    amount:         Optional[float] # chips added this action in BBs (None for CHECK/FOLD)
     amount_bb:      Optional[float] # same as amount (BBs) — filled in Phase 4
     street:         Street
     timestamp:      int             # unix epoch
-    amount_dollars: Optional[float] = None  # amount × bb_dollar_value (filled in Phase 4)
+    amount_dollars:    Optional[float] = None  # amount × bb_dollar_value (filled in Phase 4)
+    street_total:      Optional[float] = None  # total committed by this seat this street (BBs)
+    street_total_bb:   Optional[float] = None  # same as street_total (filled in Phase 4)
+    street_total_dollars: Optional[float] = None  # street_total × bb_dollar_value (Phase 4)
     stack_before:   Optional[float] = None  # stack before this action (BBs)
     stack_after:    Optional[float] = None  # stack after this action (BBs)
 
     def to_dict(self) -> dict:
         return {
-            "seat":           self.seat,
-            "username":       self.username,
-            "action":         self.action,
-            "amount":         self.amount,
-            "amount_bb":      self.amount_bb,
-            "amount_dollars": self.amount_dollars,
-            "stack_before":   self.stack_before,
-            "stack_after":    self.stack_after,
-            "street":         self.street,
-            "timestamp":      self.timestamp,
+            "seat":                  self.seat,
+            "username":              self.username,
+            "action":                self.action,
+            "amount":                self.amount,
+            "amount_bb":             self.amount_bb,
+            "amount_dollars":        self.amount_dollars,
+            "street_total":          self.street_total,
+            "street_total_bb":       self.street_total_bb,
+            "street_total_dollars":  self.street_total_dollars,
+            "stack_before":          self.stack_before,
+            "stack_after":           self.stack_after,
+            "street":                self.street,
+            "timestamp":             self.timestamp,
         }
 
 
