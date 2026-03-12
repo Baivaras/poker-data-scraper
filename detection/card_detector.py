@@ -20,6 +20,14 @@ _SUIT_MAP = ['c', 'd', 'h', 's']
 
 _hand_counter = 0  # module-level counter for hand_id generation
 
+# Hero card cache: (image_hash, HeroCardsResult) — NN skipped when pixels unchanged
+_hero_cache: Optional[tuple] = None
+
+
+def _img_hash(img: Image.Image) -> bytes:
+    """Fast perceptual hash: 8×8 grayscale thumbnail as raw bytes."""
+    return img.convert("L").resize((8, 8), Image.BILINEAR).tobytes()
+
 
 def _variance(img: Image.Image) -> float:
     arr = np.array(img.convert("L"), dtype=float)
@@ -86,7 +94,13 @@ def detect_hero_cards(img: Image.Image, cfg: TrackerConfig) -> Optional[HeroCard
     # 2. Crop the NN classification region (matches model training fractions)
     nn_crop = crop_region(img, cfg.regions.hero_nn_region())
 
-    # 3. Split into left / right card using same insets as the original trainer
+    # 3. Cache check — skip NN entirely when pixels are unchanged
+    global _hero_cache
+    region_hash = _img_hash(nn_crop)
+    if _hero_cache is not None and _hero_cache[0] == region_hash:
+        return _hero_cache[1]
+
+    # 4. Split into left / right card using same insets as the original trainer
     cw, ch = nn_crop.size
     left_crop  = nn_crop.crop((cw // 8,     5, cw // 2 - 5, ch - 5))
     right_crop = nn_crop.crop((cw // 2 + 5, 5, 7 * cw // 8, ch - 5))
@@ -115,9 +129,11 @@ def detect_hero_cards(img: Image.Image, cfg: TrackerConfig) -> Optional[HeroCard
         return Card(rank=s[:-1], suit=s[-1])
 
     _hand_counter += 1
-    return HeroCardsResult(
+    result = HeroCardsResult(
         cards=[_parse(card1_str), _parse(card2_str)],
         confidence=round(confidence, 4),
         timestamp=int(time.time()),
         hand_id=f"hand_{_hand_counter:04d}",
     )
+    _hero_cache = (region_hash, result)
+    return result

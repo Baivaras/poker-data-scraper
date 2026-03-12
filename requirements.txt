@@ -2,6 +2,7 @@ numpy
 Pillow
 torch
 torchvision
+opencv-python
 pyobjc-framework-Quartz
 pytesseract
 pynput

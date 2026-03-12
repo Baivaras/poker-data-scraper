@@ -20,6 +20,7 @@ build/
 
 # Logs (generated at runtime — not images)
 logs/
+tests/
 
 # Snapshots / temp outputs
 snapshot.json

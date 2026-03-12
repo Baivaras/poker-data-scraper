@@ -225,7 +225,7 @@ class GameTracker:
             hs.community_cards = [
                 c for c in detect_board_cards(img, self._cfg) if c is not None
             ]
-            self._on_street_change(street)
+            self._on_street_change(street, hs.community_cards)
 
         # ── 2. Hand end detection ─────────────────────────────────────────────
         hero_result = detect_hero_cards(img, self._cfg)

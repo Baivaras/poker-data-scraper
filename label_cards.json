@@ -1,0 +1,210 @@
+{
+  "00017.png": {
+    "hero": null,
+    "board": [
+      "4d",
+      "6s",
+      "Ad",
+      "Th"
+    ]
+  },
+  "00023.png": {
+    "hero": null,
+    "board": [
+      "4d",
+      "6s",
+      "Ad",
+      "Th",
+      "Tc"
+    ]
+  },
+  "00044.png": {
+    "hero": null,
+    "board": [
+      "Kh",
+      "Ts",
+      "5s"
+    ]
+  },
+  "00115.png": {
+    "hero": [
+      "Qs",
+      "5d"
+    ],
+    "board": [
+      "5h",
+      "3c",
+      "8c"
+    ]
+  },
+  "00235.png": {
+    "hero": [
+      "8d",
+      "7s"
+    ],
+    "board": null
+  },
+  "00262.png": {
+    "hero": [
+      "8d",
+      "7s"
+    ],
+    "board": [
+      "4h",
+      "5s",
+      "4c"
+    ]
+  },
+  "00276.png": {
+    "hero": null,
+    "board": [
+      "4h",
+      "5s",
+      "4c",
+      "Qc",
+      "5c"
+    ]
+  },
+  "00334.png": {
+    "hero": [
+      "4s",
+      "2s"
+    ],
+    "board": [
+      "7s",
+      "5s",
+      "7c",
+      "6s",
+      "Kh"
+    ]
+  },
+  "00359.png": {
+    "hero": null,
+    "board": null
+  },
+  "00425.png": {
+    "hero": [
+      "Qd",
+      "9h"
+    ],
+    "board": [
+      "9c",
+      "Jd",
+      "Qc",
+      "8s"
+    ]
+  },
+  "00432.png": {
+    "hero": [
+      "Qd",
+      "9h"
+    ],
+    "board": [
+      "9c",
+      "Jd",
+      "Qc",
+      "8s"
+    ]
+  },
+  "00472.png": {
+    "hero": null,
+    "board": [
+      "2d",
+      "2s",
+      "6s",
+      "8s",
+      "8c"
+    ]
+  },
+  "cap_0002.png": {
+    "hero": null,
+    "board": [
+      "8c",
+      "As",
+      "Ks"
+    ]
+  },
+  "cap_0003.png": {
+    "hero": null,
+    "board": [
+      "8c",
+      "As",
+      "Ks",
+      "4s"
+    ]
+  },
+  "cap_0004.png": {
+    "hero": [
+      "Ac",
+      "2s"
+    ],
+    "board": null
+  },
+  "cap_0005.png": {
+    "hero": [
+      "Ac",
+      "2s"
+    ],
+    "board": null
+  },
+  "cap_0006.png": {
+    "hero": [
+      "Ac",
+      "2s"
+    ],
+    "board": null
+  },
+  "cap_0007.png": {
+    "hero": null,
+    "board": null
+  },
+  "cap_0008.png": {
+    "hero": [
+      "Ah",
+      "Ks"
+    ],
+    "board": [
+      "Kd",
+      "8h",
+      "2s"
+    ]
+  },
+  "cap_0009.png": {
+    "hero": [
+      "Ah",
+      "Ks"
+    ],
+    "board": [
+      "Kd",
+      "8h",
+      "2s",
+      "5d",
+      "Kh"
+    ]
+  },
+  "cap_20260311_162904.png": {
+    "hero": null,
+    "board": null
+  },
+  "cap_20260311_162922.png": {
+    "hero": null,
+    "board": [
+      "Kd",
+      "Qs",
+      "Td"
+    ]
+  },
+  "cap_20260311_163551.png": {
+    "hero": [
+      "Kd",
+      "2h"
+    ],
+    "board": [
+      "9d",
+      "7c",
+      "Tc",
+      "Qc",
+      "8h"
+    ]
+  }
+}
