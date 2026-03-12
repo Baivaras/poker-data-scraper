@@ -54,7 +54,7 @@ class GameTracker:
     """
 
     HERO_DEBOUNCE     = 2    # frames of hero cards present to start hand
-    HERO_ABSENT_LIMIT = 3    # frames of hero cards absent to end hand (if board also clear)
+    HERO_ABSENT_LIMIT = 3    # frames of hero cards absent to end hand (normal path)
     BTN_SAT_THRESHOLD = 0.04 # fraction of high-sat pixels = buttons visible
 
     def __init__(
@@ -84,6 +84,7 @@ class GameTracker:
         self._hand_state:   Optional[HandState] = None
         self._hand_counter: int              = 0
         self._running:      bool             = False
+        self._board_was_seen: bool           = False  # True once board_count > 0 this hand
 
         # Debounce counters
         self._hero_present_frames = 0
@@ -239,6 +240,8 @@ class GameTracker:
             self._hero_absent_frames += 1
 
         board_count = self._streets._current_count
+        if board_count > 0:
+            self._board_was_seen = True
 
         if not hero_present and not hs.hero_folded:
             if board_count == 0:
@@ -250,10 +253,16 @@ class GameTracker:
                 # Hero folded mid-hand — keep tracking
                 hs.hero_folded = True
 
-        if hs.hero_folded and board_count == 0 and \
-                self._hero_absent_frames >= self.HERO_ABSENT_LIMIT:
-            self._end_hand()
-            return
+        if hs.hero_folded:
+            # Postflop fold: board appeared then cleared → hand over
+            if self._board_was_seen and board_count == 0 and \
+                    self._hero_absent_frames >= self.HERO_ABSENT_LIMIT:
+                self._end_hand()
+                return
+            # Preflop fold: new hero cards appeared → next hand started
+            if hero_present:
+                self._end_hand()
+                return
 
         # ── 3. Player action detection ────────────────────────────────────────
         new_actions = self._actions.detect(img, street, hs.table_state)
@@ -361,6 +370,7 @@ class GameTracker:
         self._hero_stack_before   = None
         self._current_round       = None
         self._round_counter       = 0
+        self._board_was_seen      = False
         self._actions.reset()
         self._streets.reset()
         self._btn_cache.reset()
