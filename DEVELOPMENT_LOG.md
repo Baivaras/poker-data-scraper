@@ -328,6 +328,6 @@ no measurable benefit at the 150ms poll rate. The sequential loop is simpler and
 | Phase | Goal |
 |-------|------|
 | 6 | Data aggregation & output (hand history JSON, WebSocket/live feed, GTO integration) |
-| Improvement | CHECK detection: replace `cards_present` visual signal with explicit `_folded_seats` set derived from detected FOLD actions |
+| Improvement | Inferred CHECK detection: derive implied CHECKs from action ordering when a seat is skipped between `_last_actor` and the current actor. Removed in favour of direct blue-label detection; add back if gaps in CHECK coverage are observed in live sessions. |
 | Improvement | Hand end detection: tail PokerStars hand history file for ground-truth result (winner, pot size, showdown cards) |
 | Validation | Collect Phase 3–5 test images from live session → run `test_game_tracker.py` |

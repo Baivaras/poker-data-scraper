@@ -244,14 +244,8 @@ class GameTracker:
             self._board_was_seen = True
 
         if not hero_present and not hs.hero_folded:
-            if board_count == 0:
-                # No cards, no board — hand is over
-                if self._hero_absent_frames >= self.HERO_ABSENT_LIMIT:
-                    self._end_hand()
-                    return
-            else:
-                # Hero folded mid-hand — keep tracking
-                hs.hero_folded = True
+            # Hero cards gone — fold on any street; keep tracking until hand truly ends
+            hs.hero_folded = True
 
         if hs.hero_folded:
             # Postflop fold: board appeared then cleared → hand over
@@ -273,34 +267,53 @@ class GameTracker:
             self._on_player_action(action)
 
         # ── 4. YOUR_TURN detection (action buttons, cached) ───────────────────
-        if not hs.hero_folded:
-            if self._btn_cache.changed(img, self._cfg.regions.action):
-                btn_visible = _action_buttons_visible(img, self._cfg)
-            else:
-                btn_visible = self._btn_was_visible
+        # Button visibility is always computed so button-disappearance can
+        # emit a FOLD event even on the same frame hero cards vanish.
+        if self._btn_cache.changed(img, self._cfg.regions.action):
+            btn_visible = _action_buttons_visible(img, self._cfg)
+        else:
+            btn_visible = self._btn_was_visible
 
-            if btn_visible and not self._btn_was_visible:
-                # Buttons just appeared → hero's turn
-                self._hero_stack_before = self._actions.hero_stack_now(img)
-                self._on_your_turn(hs)
+        if not hs.hero_folded and btn_visible and not self._btn_was_visible:
+            # Buttons just appeared → hero's turn
+            self._hero_stack_before = self._actions.hero_stack_now(img)
+            self._on_your_turn(hs)
 
-            elif not btn_visible and self._btn_was_visible:
-                # Buttons just disappeared → hero acted
-                hero_action = self._actions.detect_hero_action(
-                    self._hero_stack_before, img, street,
-                    hs.table_state.hero_username if hs.table_state else None,
+        if not btn_visible and self._btn_was_visible:
+            # Buttons just disappeared → hero acted.
+            # Fall back to last known stack if we never captured a before-snapshot
+            # (buttons appeared and disappeared within one poll interval).
+            username     = hs.table_state.hero_username if hs.table_state else None
+            stack_before = self._hero_stack_before or self._actions.last_hero_stack()
+            hero_action  = self._actions.detect_hero_action(
+                stack_before, img, street, username,
+            )
+            if hero_action:
+                # BET / CALL / RAISE / ALL_IN detected via stack delta
+                self._fill_bb(hero_action)
+                hs.all_actions.append(hero_action)
+                self._route_action(hero_action)
+                self._on_player_action(hero_action)
+            elif not hero_present:
+                # Cards gone, no stack delta → FOLD
+                # (hero_folded already set in section 2; emit the action event)
+                hs.hero_folded = True
+                fold_action = PlayerAction(
+                    seat      = 0,
+                    username  = username,
+                    action    = "FOLD",
+                    amount    = None,
+                    amount_bb = None,
+                    street    = street,
+                    timestamp = int(time.time()),
                 )
-                if hero_action:
-                    if hero_action.action == "FOLD":
-                        hs.hero_folded = True
-                    self._fill_bb(hero_action)
-                    hs.all_actions.append(hero_action)
-                    self._route_action(hero_action)
-                    self._on_player_action(hero_action)
-                    self._actions.record_actor(0)   # seat 0 = hero
-                self._hero_stack_before = None
+                self._fill_bb(fold_action)
+                hs.all_actions.append(fold_action)
+                self._route_action(fold_action)
+                self._on_player_action(fold_action)
+            self._hero_stack_before = None
 
-            self._btn_was_visible = btn_visible
+        self._btn_was_visible = btn_visible
 
     # ── BB annotation ─────────────────────────────────────────────────────────
 
