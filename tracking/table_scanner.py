@@ -115,7 +115,8 @@ def _determine_status(username_raw: str, stack_raw: str) -> SeatStatus:
     Rules (matches PokerStars UI text):
       • username ≈ "empty" AND stack ≈ "seat"  → EMPTY
       • stack contains "sitting" or "sit out"   → SITTING_OUT
-      • username is blank                        → EMPTY (no one registered)
+      • username is blank AND stack not numeric  → EMPTY (seat truly unoccupied)
+      • username is blank AND stack is numeric   → ACTIVE (label showing, player present)
       • otherwise                               → ACTIVE
     """
     u = username_raw.lower().strip()
@@ -126,7 +127,9 @@ def _determine_status(username_raw: str, stack_raw: str) -> SeatStatus:
     if "sitting" in s or "sit out" in s or "sitout" in s:
         return "SITTING_OUT"
     if not u:
-        return "EMPTY"
+        # Blank username — could be a label that OCR couldn't read.
+        # If the stack region has a numeric value the seat is occupied.
+        return "ACTIVE" if _parse_stack_from_raw(s) is not None else "EMPTY"
     return "ACTIVE"
 
 

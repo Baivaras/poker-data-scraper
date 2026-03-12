@@ -323,6 +323,71 @@ no measurable benefit at the 150ms poll rate. The sequential loop is simpler and
 
 ---
 
+---
+
+## Post-Phase 5 — Threading, Fold Tracking & CHECK Detection
+
+### Parallel stack OCR
+`ActionDetector.detect()` now pre-crops all active seat stack regions and reads them concurrently via `ThreadPoolExecutor`. Only the Tesseract OCR calls are parallelised — action processing (`_check_delta`, `_street_committed`, `_current_call_amount`) remains sequential to avoid races on shared state. Folded seats are excluded from the job map before launching threads so out-of-order completion never corrupts seat→result mapping.
+
+### Hero fold tracking
+Previously `on_hand_complete` fired ~450ms after a preflop fold because `HERO_ABSENT_LIMIT=3` triggered before opponents finished. Fixed:
+- `hero_folded=True` is set immediately when hero cards vanish (any street)
+- After fold, hand ends only on natural signals: board clears after being seen (postflop), or new hero cards appear (preflop / everyone-folded-out scenario)
+- No frame-count timeout when `hero_folded=True`
+
+### CHECK detection
+Removed `_infer_checks` (action-ordering inference). Replaced with direct blue-label detection:
+- `_is_check_label(img, region)` counts blue-dominant pixels (`B > 80` and `B > R+30` and `B > G+20`). Fraction ≥ 0.02 → "Check" label present. No template file required.
+- Runs per frame on each opponent `name` region via `RegionCache` (cost ~0 on static frames)
+- Also runs on `hero_name` region for hero CHECK detection
+- `check_label_active` flag per seat prevents duplicate emissions while label stays on screen
+- Hero FOLD: emitted explicitly when buttons disappear and hero cards are gone (delta=0 → `_classify` returns None, so fold is detected via card-absence rather than stack delta)
+- Hero BET/CALL/RAISE: falls back to `last_hero_stack()` when `_hero_stack_before` is None (buttons appeared and disappeared within one poll)
+
+---
+
+## Post-Phase 5 — Session State & JSONL Logging
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `tracking/session_state.py` | `SessionState` — username registry, JSONL log writer, `parse_table_name()` |
+| `session_logs/` | Per-session JSONL files (created at runtime) |
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `tracking/game_tracker.py` | Integrates `SessionState`; scans usernames every frame; post-processes action usernames; new hand_id format; passes `scan_ms` to `on_hand_start` |
+| `tracking/logger.py` | `on_hand_start` displays `scan=XXXms` |
+| `tracking/table_scanner.py` | `_determine_status` uses stack presence to detect occupied seats with blank OCR (label showing) — fixes dealer detection when dealer seat name region is obscured |
+
+### Username persistence
+`SessionState` maintains `{seat → username}` across all hands for a full session:
+- `update_usernames(img, cfg)` runs every frame via `RegionCache` — only OCR-reads a region when pixels change
+- OCR results are cleaned with `_CLEAN_RE` (strips `'`, `/`, `|`, `:`, `;`, `-`, etc.) before blocklist matching
+- `_LABEL_BLOCKLIST` filters known action/status strings (`check`, `bet`, `raise`, `call`, `fold`, `post bb`, `post sb`, `all in`, `sitting out`, etc.)
+- Only updates stored username if the new clean value differs from stored (no redundant writes)
+- Seat cleared on EMPTY detection; kept on SITTING_OUT
+- `table_state` player usernames patched from session state after each `scanner.scan()` — logger always shows clean names
+
+### Hand ID format
+Changed from `hand_0001` to `hand_{session_id}_{counter}` — e.g. `hand_20260312_160905_0001`. Globally unique across sessions.
+
+### JSONL session log
+`session_logs/session_{session_id}.jsonl`:
+- Line 1: session header `{"type": "session", "session_id": ..., "table": ..., "started_at": ...}`
+- Lines 2+: one completed hand per line, appended immediately on `on_hand_complete` (no data loss on crash)
+- Hand record includes: hand_id, timestamps, BB, hero cards, community cards, positions, all actions with amounts/BB/dollars/street_totals/stacks
+
+### Dealer detection fix
+`_determine_status` previously returned `EMPTY` when OCR read blank from a name region (label showing that Tesseract couldn't parse). If the dealer sat at that seat, `assign_positions` would exclude them from `active` and return `{}` (no positions). Fix: blank username + numeric stack → `ACTIVE` (player present with label obscuring name).
+
+### Session boundary
+One `GameTracker` instance = one session. New PokerStars table = new window = new process = new session. No detection needed.
+
+---
+
 ## Pending / Next Phases
 
 | Phase | Goal |

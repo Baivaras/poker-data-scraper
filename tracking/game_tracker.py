@@ -12,6 +12,7 @@ Emits four callbacks:
 """
 import sys
 import time
+from datetime import datetime
 from enum import Enum, auto
 from pathlib import Path
 from typing import Callable, List, Optional
@@ -29,6 +30,7 @@ from core.hand_state import ActionRound, HandState, PlayerAction, Street
 from core.models import HeroCardsResult
 from detection.region_cache import RegionCache
 from detection.street_detector import StreetDetector
+from tracking.session_state import SessionState, parse_table_name
 from tracking.table_scanner import TableScanner
 from core.table_state import TableState
 
@@ -101,6 +103,9 @@ class GameTracker:
         # Live mode window title (for BB detection from title)
         self._window_title: Optional[str] = None
 
+        # Session state — created lazily on first process_frame so window title is available
+        self._session: Optional[SessionState] = None
+
     # ── public API ────────────────────────────────────────────────────────────
 
     def start(self):
@@ -134,6 +139,16 @@ class GameTracker:
 
     def process_frame(self, img: Image.Image) -> None:
         """Process a single screenshot through the state machine."""
+        if self._session is None:
+            self._session = SessionState(
+                session_id = datetime.now().strftime("%Y%m%d_%H%M%S"),
+                table_name = parse_table_name(self._window_title),
+            )
+
+        # Always scan name regions regardless of hand state — catches real usernames
+        # whenever labels disappear, even between hands.
+        self._session.update_usernames(img, self._cfg)
+
         if self._state == _State.IDLE:
             self._state_idle(img)
         elif self._state == _State.HAND_STARTING:
@@ -184,16 +199,25 @@ class GameTracker:
             return
 
         self._hand_counter += 1
-        hand_id = f"hand_{self._hand_counter:04d}"
+        hand_id = f"hand_{self._session.session_id}_{self._hand_counter:04d}"
 
-        # Phase 2 snapshot
+        # Phase 2 snapshot — timed so the logger can report total scan latency
+        _t_scan = time.monotonic()
         table_state = self._scanner.scan(img, hand_id)
-
-        # Seed stacks for action detection
         self._actions.snapshot(img)
-
-        # BB detection (Phase 4)
         bb = detect_bb(img, self._cfg, self._window_title)
+        scan_ms = round((time.monotonic() - _t_scan) * 1000)
+
+        # Patch table_state usernames with session state so the logger
+        # and all consumers always see the best-known name, never a label.
+        if self._session and table_state:
+            for p in table_state.players:
+                sess_name = self._session.get_username(p.seat)
+                if sess_name:
+                    p.username = sess_name
+            hero_name = self._session.get_username(0)
+            if hero_name:
+                table_state.hero_username = hero_name
 
         # Initialise hand state
         self._streets.reset()
@@ -212,7 +236,7 @@ class GameTracker:
         )
 
         self._state = _State.HAND_ACTIVE
-        self._on_hand_start(result, table_state)
+        self._on_hand_start(result, table_state, scan_ms)
 
     def _state_hand_active(self, img: Image.Image):
         hs = self._hand_state
@@ -261,6 +285,9 @@ class GameTracker:
         # ── 3. Player action detection ────────────────────────────────────────
         new_actions = self._actions.detect(img, street, hs.table_state)
         for action in new_actions:
+            sess_name = self._session.get_username(action.seat)
+            if sess_name:
+                action.username = sess_name
             self._fill_bb(action)
             hs.all_actions.append(action)
             self._route_action(action)
@@ -283,7 +310,8 @@ class GameTracker:
             # Buttons just disappeared → hero acted.
             # Fall back to last known stack if we never captured a before-snapshot
             # (buttons appeared and disappeared within one poll interval).
-            username     = hs.table_state.hero_username if hs.table_state else None
+            username     = self._session.get_username(0) or \
+                           (hs.table_state.hero_username if hs.table_state else None)
             stack_before = self._hero_stack_before or self._actions.last_hero_stack()
             hero_action  = self._actions.detect_hero_action(
                 stack_before, img, street, username,
@@ -369,9 +397,10 @@ class GameTracker:
         self._close_round()
         hs = self._hand_state
         if hs:
-            import time as _t
-            hs.completed_at = int(_t.time())
+            hs.completed_at = int(time.time())
             self._on_hand_complete(hs)
+            if self._session:
+                self._session.record_hand(hs)
         self._state = _State.IDLE
         self._reset_state()
 

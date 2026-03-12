@@ -92,13 +92,13 @@ class PokerLogger:
 
     # ── event handlers ────────────────────────────────────────────────────────
 
-    def on_hand_start(self, result: HeroCardsResult, table: TableState):
+    def on_hand_start(self, result: HeroCardsResult, table: TableState, scan_ms: int = 0):
         dealer = ("hero" if table.dealer_seat == 0
                   else f"seat {table.dealer_seat}"
                   if table.dealer_seat is not None else "?")
         print(f"\n  {'━'*66}", flush=True)
         self._log("HAND START", f"dealer={dealer}  pos={table.hero_position or '?'}  "
-                  f"hand={table.hand_id}", "bold")
+                  f"hand={table.hand_id}  {_DIM}scan={scan_ms}ms{_RESET}", "bold")
 
         cards_str = self._fmt_cards([c.to_str() for c in result.cards])
         print(f"  {self._ts()}  {_BOLD}{'HERO CARDS':<16}{_RESET}  "
